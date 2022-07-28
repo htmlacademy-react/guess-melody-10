@@ -1,5 +1,6 @@
-import {Route, BrowserRouter, Routes} from 'react-router-dom';
-import {AppRoute, AuthorizationStatus, MAX_MISTAKE_COUNT} from '../../const';
+import {Route, Routes} from 'react-router-dom';
+import {useAppSelector} from '../../hooks';
+import {AppRoute, MAX_MISTAKE_COUNT} from '../../const';
 import WelcomeScreen from '../../pages/welcome-screen/welcome-screen';
 import AuthScreen from '../../pages/auth-screen/auth-screen';
 import GameOverScreen from '../../pages/game-over-screen/game-over-screen';
@@ -7,10 +8,22 @@ import WinScreen from '../../pages/win-screen/win-screen';
 import NotFoundScreen from '../../pages/not-found-screen/not-found-screen';
 import PrivateRoute from '../private-route/private-route';
 import GameScreen from '../../pages/game-screen/game-screen';
+import LoadingScreen from '../../pages/loading-screen/loading-screen';
+import HistoryRouter from '../history-route/history-route';
+import {isCheckedAuth} from '../../game';
+import browserHistory from '../../browser-history';
 
 function App(): JSX.Element {
+  const {authorizationStatus, isDataLoaded} = useAppSelector((state) => state);
+
+  if (isCheckedAuth(authorizationStatus) || isDataLoaded) {
+    return (
+      <LoadingScreen />
+    );
+  }
+
   return (
-    <BrowserRouter>
+    <HistoryRouter history={browserHistory}>
       <Routes>
         <Route
           path={AppRoute.Root}
@@ -24,7 +37,7 @@ function App(): JSX.Element {
           path={AppRoute.Result}
           element={
             <PrivateRoute
-              authorizationStatus={AuthorizationStatus.NoAuth}
+              authorizationStatus={authorizationStatus}
             >
               <WinScreen />
             </PrivateRoute>
@@ -45,7 +58,7 @@ function App(): JSX.Element {
           element={<NotFoundScreen />}
         />
       </Routes>
-    </BrowserRouter>
+    </HistoryRouter>
   );
 }
 
